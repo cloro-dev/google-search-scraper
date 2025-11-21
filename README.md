@@ -46,11 +46,11 @@ with open('response.json', 'w') as file:
 
 ### Request sample (cURL)
 
-```bash
+````bash
 curl -X POST https://api.cloro.dev/v1/monitor/google \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d 
+  -d
 ```json
 {
     "query": "best laptops for programming 2024",
@@ -61,7 +61,7 @@ curl -X POST https://api.cloro.dev/v1/monitor/google \
       }
     }
   }
-```
+````
 
 ### Request sample (Node.js)
 
@@ -97,14 +97,14 @@ axios
 
 | Parameter            | Description                                                                 | Default value |
 | -------------------- | --------------------------------------------------------------------------- | ------------- |
-| `query`*            | The search query (1-10,000 characters)                                      | –             |
+| `query`\*            | The search query (1-10,000 characters)                                      | –             |
 | `country`            | Optional country/region code for localized results (e.g., `US`, `GB`, `DE`) | `US`          |
 | `city`               | Canonical city name for hyperlocal results (auto-converted to uule)         | –             |
 | `pages`              | Number of search results pages to scrape (1-20)                             | `1`           |
 | `include.html`       | Include raw HTML response when set to true                                  | `false`       |
 | `include.aioverview` | Include AI Overview (use `{"markdown": true}` for markdown format)          | `false`       |
 
-* Mandatory parameters
+- Mandatory parameters
 
 ---
 
@@ -229,12 +229,12 @@ For detailed documentation, advanced features, and integration guides, visit:
 
 ## Other available scrapers
 
-- **[AI Mode](../aimode/)** - Extracts structured data from Google AI Mode for general knowledge queries, workflow optimization, and technical guidance.
-- **[AI Overview](../aioverview/)** - Extracts structured data from Google AI Overview for comprehensive search result analysis and AI-curated insights.
-- **[ChatGPT](../chatgpt/)** - Extracts structured data from ChatGPT with advanced features including shopping cards, raw response data, and query fan-out.
-- **[Copilot](../copilot/)** - Extracts structured data from Microsoft Copilot for development tools, Microsoft ecosystem research, and enterprise-focused queries.
-- **[Google](../google/)** - Extracts structured data from Google Search results, including organic results, People Also Ask questions, related searches, and optional AI Overview data.
-- **[Perplexity](../perplexity/)** - Extracts comprehensive structured data from Perplexity AI with real-time web sources, automatically detecting and extracting rich data objects.
+- **[AI Mode](https://cloro.dev/ai-mode/)** - Extracts structured data from Google AI Mode for general knowledge queries, workflow optimization, and technical guidance.
+- **[AI Overview](https://cloro.dev/ai-overview/)** - Extracts structured data from Google AI Overview for comprehensive search result analysis and AI-curated insights.
+- **[ChatGPT](https://cloro.dev/chatgpt/)** - Extracts structured data from ChatGPT with advanced features including shopping cards, raw response data, and query fan-out.
+- **[Copilot](https://cloro.dev/copilot/)** - Extracts structured data from Microsoft Copilot for development tools, Microsoft ecosystem research, and enterprise-focused queries.
+- **[Google](https://cloro.dev/google-search/)** - Extracts structured data from Google Search results, including organic results, People Also Ask questions, related searches, and optional AI Overview data.
+- **[Perplexity](https://cloro.dev/perplexity/)** - Extracts comprehensive structured data from Perplexity AI with real-time web sources, automatically detecting and extracting rich data objects.
 
 ## Contact us
 
