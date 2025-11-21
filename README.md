@@ -100,6 +100,7 @@ axios
 | `query`\*            | The search query (1-10,000 characters)                                      | –             |
 | `country`            | Optional country/region code for localized results (e.g., `US`, `GB`, `DE`) | `US`          |
 | `city`               | Canonical city name for hyperlocal results (auto-converted to uule)         | –             |
+| `device`             | Device type for search results (`desktop` or `mobile`)                      | `desktop`     |
 | `pages`              | Number of search results pages to scrape (1-20)                             | `1`           |
 | `include.html`       | Include raw HTML response when set to true                                  | `false`       |
 | `include.aioverview` | Include AI Overview (use `{"markdown": true}` for markdown format)          | `false`       |
