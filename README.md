@@ -1,6 +1,6 @@
 # Google Search scraper
 
-[![Google Search scraper by cloro](https://github.com/cloro-dev/google-search-scraper/blob/main/google-scraper-hero-image.png)](https://cloro.dev/google/?utm_source=github)
+[![Google Search scraper by cloro](https://github.com/cloro-dev/google-search-scraper/blob/main/google-scraper-hero-image.png)](https://cloro.dev/google-search/?utm_source=github)
 
 [![cloro](https://img.shields.io/badge/Powered%20by-cloro-blue?style=for-the-badge)](https://cloro.dev/)
 
@@ -46,13 +46,11 @@ with open('response.json', 'w') as file:
 
 ### Request sample (cURL)
 
-````bash
+```bash
 curl -X POST https://api.cloro.dev/v1/monitor/google \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d
-```json
-{
+  -d '{
     "query": "best laptops for programming 2024",
     "country": "US",
     "include": {
@@ -60,8 +58,8 @@ curl -X POST https://api.cloro.dev/v1/monitor/google \
         "markdown": true
       }
     }
-  }
-````
+  }'
+```
 
 ### Request sample (Node.js)
 
@@ -99,7 +97,6 @@ axios
 | -------------------- | --------------------------------------------------------------------------- | ------------- |
 | `query`\*            | The search query (1-10,000 characters)                                      | –             |
 | `country`            | Optional country/region code for localized results (e.g., `US`, `GB`, `DE`) | `US`          |
-| `city`               | Canonical city name for hyperlocal results (auto-converted to uule)         | –             |
 | `device`             | Device type for search results (`desktop` or `mobile`)                      | `desktop`     |
 | `pages`              | Number of search results pages to scrape (1-20)                             | `1`           |
 | `include.html`       | Include raw HTML response when set to true                                  | `false`       |
@@ -126,6 +123,30 @@ The Google Search scraper API returns a structured JSON object containing Google
         "link": "https://example.com/best-laptops",
         "displayedLink": "https://example.com",
         "snippet": "Comprehensive guide to choosing the perfect laptop for software development..."
+      }
+    ],
+    "ads": [
+      {
+        "position": 1,
+        "blockPosition": "top",
+        "title": "Best Programming Laptops - Fast Shipping",
+        "url": "https://example.com/shop/laptops",
+        "page": 1,
+        "displayedUrl": "example.com/laptops",
+        "domain": "example.com",
+        "description": "Shop our selection of high-performance laptops for developers. Free shipping on orders over $500.",
+        "sitelinks": [
+          {
+            "url": "https://example.com/gaming-laptops",
+            "title": "Gaming Laptops",
+            "description": "High-performance laptops for gaming and development"
+          },
+          {
+            "url": "https://example.com/business-laptops",
+            "title": "Business Laptops",
+            "description": "Reliable laptops for professionals"
+          }
+        ]
       }
     ],
     "peopleAlsoAsk": [
@@ -155,12 +176,24 @@ The Google Search scraper API returns a structured JSON object containing Google
       "text": "Based on current information, the best laptops for programming...",
       "markdown": "**Based on current information**, the best laptops..."
     },
-    "html": "<!DOCTYPE html>..."
+    "html": [
+      "https://storage.cloro.dev/results/b83e8dfd-c3a1-4b98-83b9-af91adc21e26/page-1.html"
+    ]
   }
 }
 ```
 
 ## Advanced features
+
+### Sponsored ad extraction
+
+The Google Search scraper automatically extracts sponsored ad results from both the top and bottom of search results pages. Each ad includes:
+
+- **Position and placement**: Position within the ad block and whether it appeared at the top or bottom of the page
+- **Ad details**: Title, destination URL, displayed URL, domain, and description
+- **Sitelinks**: Extended ad sitelinks with titles, URLs, and descriptions when available
+
+Ads are extracted automatically whenever they appear on the search results page—no additional parameters required.
 
 ### AI Overview extraction
 
@@ -170,26 +203,22 @@ Get Google's AI-generated summaries with source attribution by setting `include.
 
 Get localized search results for different countries by specifying the `country` parameter (e.g., "US", "GB", "DE", "FR", "JP").
 
-### Hyperlocal search
-
-Get city-specific search results using the `city` parameter with canonical city names (e.g., "New York", "Paris,Île-de-France", "Tokyo,Tokyo,Japan"). The backend automatically converts these to Google's location parameter.
-
 ### Multiple page scraping
 
-Scrape multiple pages of search results in a single request using the `pages` parameter (up to 20 pages).
+Scrape multiple pages of search results in a single request using the `pages` parameter (up to 10 pages).
 
 ### Raw HTML access
 
-For advanced use cases, get the complete HTML by setting `include.html` to `true`.
+For advanced use cases, get the complete HTML by setting `include.html` to `true`. Returns an array of HTML file URLs.
 
 ## Practical Google Search scraper use cases
 
 1. **SEO monitoring:** Track keyword rankings and monitor search performance.
-2. **Competitor analysis:** Analyze competitor presence and search visibility.
+2. **Competitor analysis:** Analyze competitor presence and search visibility, including sponsored ad placements.
 3. **Content ideas:** Generate content ideas from "People Also Ask" and related searches.
 4. **Market research:** Gather insights on market trends and consumer interests.
 5. **Brand monitoring:** Track brand mentions and sentiment in search results.
-6. **Ad verification:** Verify ad placements and targeting (using specific location parameters).
+6. **Ad intelligence:** Monitor competitor ad strategies, ad copy, and landing pages to inform your own paid search campaigns.
 
 ## Why choose cloro?
 
@@ -210,12 +239,12 @@ Any website is legal to be scraped as long as the information is publicly access
 cloro's Google endpoint provides reliable access to Google Search with:
 
 - **AI Overview extraction** with source attribution
-- **Hyperlocal targeting** down to the city level
+- **Sponsored ad extraction** with full ad details, sitelinks, and placement information
 - **Built-in anti-detection** to ensure consistent results
 
 ### What's the recommended timeout for requests?
 
-We recommend setting a timeout of 30-60 seconds. Our system handles automatic retries, but implementing your own retry logic provides the best reliability.
+We don't recommend putting any timeout, given that our system retries automatically. We recommend setting up a retry mechanism in case of failure.
 
 ### Does the API support different countries?
 
@@ -225,22 +254,24 @@ Yes, you can specify country codes like `US`, `GB`, `DE`, `JP` and more to get l
 
 For detailed documentation, advanced features, and integration guides, visit:
 
-- **API documentation:** [docs.cloro.dev](https://docs.cloro.dev)
+- **API documentation:** [docs.cloro.dev](https://docs.cloro.dev/)
 - **Google Search scraper page:** [cloro.dev/google-search](https://cloro.dev/google-search/)
 
 ## Other available scrapers
 
 - **[AI Mode](https://cloro.dev/ai-mode/)** - Extracts structured data from Google AI Mode for general knowledge queries, workflow optimization, and technical guidance.
 - **[AI Overview](https://cloro.dev/ai-overview/)** - Extracts structured data from Google AI Overview for comprehensive search result analysis and AI-curated insights.
-- **[Gemini](https://cloro.dev/gemini/)** - Extracts structured data from Google Gemini for complex reasoning, content generation, and source confidence scoring.
 - **[ChatGPT](https://cloro.dev/chatgpt/)** - Extracts structured data from ChatGPT with advanced features including shopping cards, raw response data, and query fan-out.
 - **[Copilot](https://cloro.dev/copilot/)** - Extracts structured data from Microsoft Copilot for development tools, Microsoft ecosystem research, and enterprise-focused queries.
+- **[Gemini](https://cloro.dev/gemini/)** - Extracts structured data from Google Gemini for complex reasoning, content generation, and source confidence scoring.
 - **[Google](https://cloro.dev/google-search/)** - Extracts structured data from Google Search results, including organic results, People Also Ask questions, related searches, and optional AI Overview data.
+- **[Google News](https://cloro.dev/google-news/)** - Extracts structured news articles from Google News with titles, snippets, sources, dates, and thumbnail images for news monitoring and media tracking.
+- **[Grok](https://cloro.dev/grok/)** - Extracts structured data from Grok for current events, news tracking, and real-time information gathering.
 - **[Perplexity](https://cloro.dev/perplexity/)** - Extracts comprehensive structured data from Perplexity AI with real-time web sources, automatically detecting and extracting rich data objects.
 
 ## Contact us
 
-If you have questions or need support, reach out to us on [our contact page](https://cloro.dev/contact).
+If you have questions or need support, reach out to us at [support@cloro.dev](mailto:support@cloro.dev).
 
 ---
 
