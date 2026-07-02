@@ -4,9 +4,9 @@
 
 [![cloro](https://img.shields.io/badge/Powered%20by-cloro-blue?style=for-the-badge)](https://cloro.dev/)
 
-The [Google Search scraper](https://cloro.dev/google-search/) by cloro enables developers to programmatically interact with Google Search and automatically collect search results along with structured metadata. Instead of manual data collection, you can retrieve results as parsed JSON, raw HTML, or other formats for seamless integration into your workflows.
+The [Google Search scraper](https://cloro.dev/google-search/) by cloro lets developers programmatically interact with Google Search and collect search results with structured metadata. You can retrieve results as parsed JSON, raw HTML, or other formats for integration into your workflows.
 
-You can use cloro's Google Search scraper for SEO monitoring, rank tracking, market research, and content idea generation. It handles dynamic content, supports real-time extraction, and eliminates the need to manage authentication, sessions, or anti-bot systems.
+You can use cloro's Google Search scraper for SEO monitoring, rank tracking, market research, and content idea generation. It handles dynamic content, supports real-time extraction, and removes the need to manage authentication, sessions, or anti-bot systems.
 
 ## How it works
 
@@ -22,6 +22,7 @@ import requests
 payload = {
     'query': 'best laptops for programming 2024',
     'country': 'US',
+    'location': 'New York,New York,United States',
     'include': {
         'aioverview': {
             'markdown': True
@@ -53,6 +54,7 @@ curl -X POST https://api.cloro.dev/v1/monitor/google \
   -d '{
     "query": "best laptops for programming 2024",
     "country": "US",
+    "location": "New York,New York,United States",
     "include": {
       "aioverview": {
         "markdown": true
@@ -69,6 +71,7 @@ const axios = require("axios");
 const payload = {
   query: "best laptops for programming 2024",
   country: "US",
+  location: "New York,New York,United States",
   include: {
     aioverview: {
       markdown: true,
@@ -97,10 +100,13 @@ axios
 | -------------------- | --------------------------------------------------------------------------- | ------------- |
 | `query`\*            | The search query (1-10,000 characters)                                      | –             |
 | `country`            | Optional country/region code for localized results (e.g., `US`, `GB`, `DE`) | `US`          |
+| `location`           | [Google canonical location name](https://developers.google.com/google-ads/api/reference/data/geotargets) for geo-targeted results (e.g., `New York,New York,United States`). Mutually exclusive with `uule` | –             |
+| `uule`               | Pre-encoded Google UULE string for precise geo-targeting. Mutually exclusive with `location` | –             |
 | `device`             | Device type for search results (`desktop` or `mobile`)                      | `desktop`     |
-| `pages`              | Number of search results pages to scrape (1-20)                             | `1`           |
+| `pages`              | Number of search results pages to scrape (1-10)                             | `1`           |
 | `include.html`       | Include raw HTML response when set to true                                  | `false`       |
 | `include.aioverview` | Include AI Overview (use `{"markdown": true}` for markdown format)          | `false`       |
+| `include.paaAioverview` | Hydrate AI-Overview-type People Also Ask items with markdown and sources  | `false`       |
 
 - Mandatory parameters
 
@@ -122,31 +128,44 @@ The Google Search scraper API returns a structured JSON object containing Google
         "title": "Best Laptops for Programming in 2024",
         "link": "https://example.com/best-laptops",
         "displayedLink": "https://example.com",
-        "snippet": "Comprehensive guide to choosing the perfect laptop for software development..."
+        "snippet": "Guide to choosing a laptop for software development..."
       }
     ],
     "ads": [
       {
         "position": 1,
         "blockPosition": "top",
-        "title": "Best Programming Laptops - Fast Shipping",
+        "type": "RESULT",
+        "title": "Programming Laptops - Fast Shipping",
         "url": "https://example.com/shop/laptops",
         "page": 1,
         "displayedUrl": "example.com/laptops",
         "domain": "example.com",
-        "description": "Shop our selection of high-performance laptops for developers. Free shipping on orders over $500.",
+        "description": "Shop our selection of laptops for developers. Free shipping on orders over $500.",
         "sitelinks": [
           {
             "url": "https://example.com/gaming-laptops",
             "title": "Gaming Laptops",
-            "description": "High-performance laptops for gaming and development"
+            "description": "Laptops for gaming and development"
           },
           {
             "url": "https://example.com/business-laptops",
             "title": "Business Laptops",
-            "description": "Reliable laptops for professionals"
+            "description": "Laptops for professionals"
           }
         ]
+      },
+      {
+        "position": 1,
+        "blockPosition": "rhs",
+        "type": "SHOPPING_CARD",
+        "category": "Sponsored products",
+        "title": "Dell XPS 13 Developer Edition",
+        "url": "https://www.google.com/aclk?sa=L&ai=...",
+        "page": 1,
+        "price": { "value": 1299, "currency": "$", "raw": "$1,299" },
+        "store": "Dell.com",
+        "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:..."
       }
     ],
     "peopleAlsoAsk": [
@@ -154,8 +173,29 @@ The Google Search scraper API returns a structured JSON object containing Google
         "question": "What specs should I look for in a programming laptop?",
         "type": "LINK",
         "snippet": "Key specifications include RAM, processor, storage...",
-        "title": "Essential laptop specs for developers",
+        "title": "Laptop specs for developers",
         "link": "https://example.com/laptop-specs"
+      },
+      {
+        "question": "Is 16GB RAM enough for programming?",
+        "type": "AIOVERVIEW",
+        "markdown": "**Yes, 16GB RAM is generally sufficient** for most programming tasks...",
+        "sources": [
+          {
+            "position": 1,
+            "label": "Developer Hardware Guide",
+            "url": "https://example.com/dev-hardware",
+            "description": "Guide to developer hardware requirements"
+          }
+        ]
+      }
+    ],
+    "peopleAreSaying": [
+      {
+        "position": 1,
+        "title": "Best running shoes 2026 - what runners are saying",
+        "link": "https://www.reddit.com/r/running/comments/example/",
+        "date": "5 days ago"
       }
     ],
     "relatedSearches": [
@@ -164,17 +204,42 @@ The Google Search scraper API returns a structured JSON object containing Google
         "link": "https://google.com/search?q=best+budget+laptop+for+coding"
       }
     ],
+    "shoppingCards": [
+      {
+        "title": "ASICS Women's Gel-Nimbus 28",
+        "productLink": "",
+        "category": "More products",
+        "price": {
+          "value": 169.99,
+          "currency": "$",
+          "raw": "$169.99"
+        },
+        "store": "DICK'S Sporting Goods",
+        "rating": 4.5,
+        "reviews": "384"
+      }
+    ],
     "aioverview": {
       "sources": [
         {
           "position": 1,
           "label": "Programming Laptop Guide",
           "url": "https://example.com/guide",
-          "description": "Complete guide to development laptops"
+          "description": "Guide to development laptops"
         }
       ],
-      "text": "Based on current information, the best laptops for programming...",
-      "markdown": "**Based on current information**, the best laptops..."
+      "citationPills": [
+        {
+          "label": "Programming Laptop Guide",
+          "citationPillId": 1,
+          "url": "https://example.com/guide",
+          "domain": "example.com",
+          "description": "Guide to development laptops",
+          "position": 1
+        }
+      ],
+      "text": "Top laptops for programming include...",
+      "markdown": "**Top laptops** for programming include...[Programming Laptop Guide](https://example.com/guide)"
     },
     "html": [
       "https://storage.cloro.dev/results/b83e8dfd-c3a1-4b98-83b9-af91adc21e26/page-1.html"
@@ -187,21 +252,47 @@ The Google Search scraper API returns a structured JSON object containing Google
 
 ### Sponsored ad extraction
 
-The Google Search scraper automatically extracts sponsored ad results from both the top and bottom of search results pages. Each ad includes:
+The Google Search scraper automatically extracts sponsored ad results from every paid surface on the SERP. Each ad carries a `type` discriminator:
 
-- **Position and placement**: Position within the ad block and whether it appeared at the top or bottom of the page
-- **Ad details**: Title, destination URL, displayed URL, domain, and description
-- **Sitelinks**: Extended ad sitelinks with titles, URLs, and descriptions when available
+- **`type: "RESULT"`** — classic text ads at the top or bottom of the main column. Include `title`, destination `url`, `displayedUrl`, `domain`, `description`, and `sitelinks`.
+- **`type: "SHOPPING_CARD"`** — shopping-style sponsored cards from the right-hand-side carousel (`blockPosition: "rhs"`) and the top-of-page carousels (`blockPosition: "top"`). Include `category` (carousel header text such as `"Sponsored products"`, `"Sponsored vehicles"`, or `"Sponsored hotels"`), `price`, optional `oldPrice` (MSRP / sale), `store`, and `imageUrl`. The destination `url` is a Google `aclk?` redirect.
 
-Ads are extracted automatically whenever they appear on the search results page—no additional parameters required.
+For `SHOPPING_CARD` ads, the `description` field carries category-specific subtitle fragments joined with `·` (e.g. `Used - 94k miles · Greeley` on a vehicle card) rather than classic ad copy.
+
+Ads are extracted automatically whenever they appear on the search results page. No additional parameters are required.
+
+### People are saying extraction
+
+When Google renders the "What people are saying" / "Trending posts and discussions" module on the SERP, the scraper extracts each card into the `peopleAreSaying` array. Each card carries `position`, `title`, `link`, and `date` (Google's raw relative-time text, not normalized). The field is omitted from `result` when no module is present.
+
+### Shopping card extraction
+
+When Google renders organic shopping grids ("Popular products" or "More products") on the SERP, the scraper extracts each card into the `shoppingCards` array. When a section header can be parsed, each card includes a `category` field naming its parent section so callers can distinguish cards from coexisting shopping panels. The `shoppingCards` field is omitted from `result` when no shopping section is present.
 
 ### AI Overview extraction
 
 Get Google's AI-generated summaries with source attribution by setting `include.aioverview` to `true` (or an object with `markdown: true`).
 
-### Country-specific searches
+#### Citation pills array structure
 
-Get localized search results for different countries by specifying the `country` parameter (e.g., "US", "GB", "DE", "FR", "JP").
+When the AI Overview answer carries pill chips (e.g. a `[Chase Bank +3]` chip grouping four sources), the `aioverview.citationPills` array exposes each cited source as a self-contained entry. When a pill cites N sources, the array contains N entries sharing the same `citationPillId` but with per-source `label`, `url`, and `domain`. Group by `citationPillId` to recover pill-level structure. The field is omitted when no pills are present.
+
+| Field            | Type    | Description                                                                                                                                                 |
+| ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `label`          | string  | Per-source title from the sources rail (e.g. `"Programming Laptop Guide"`). Always present; may be an empty string when the rail has no title for this source — read `domain` / `url` for source identity in that case.  |
+| `citationPillId` | integer | Stable identifier shared by all entries from the same visible chip. 1-based ordinal in document order.                                                      |
+| `url`            | string  | Direct URL of the cited source.                                                                                                                             |
+| `domain`         | string  | Host extracted from `url`, for grouping and display.                                                                                                        |
+| `description`    | string  | Source snippet from the sources rail when Google ships one. Omitted when absent.                                                                            |
+| `position`       | integer | 1-based position of this source in the sibling `aioverview.sources` array.                                                                                  |
+
+### People Also Ask AI Overview hydration
+
+Some People Also Ask items are AI-Overview-type answers rather than traditional linked snippets. Set `include.paaAioverview` to `true` to hydrate these items with markdown content and cited sources. Items that cannot be hydrated gracefully degrade to `type: "AIOVERVIEW"` without markdown or sources.
+
+### Country and city-level geo-targeting
+
+Get localized search results for different countries by specifying the `country` parameter (e.g., "US", "GB", "DE", "FR", "JP"). For city-level precision, add the `location` parameter using [Google canonical location names](https://developers.google.com/google-ads/api/reference/data/geotargets) (e.g., "New York,New York,United States") to geo-target results from ~100,000 supported locations. Alternatively, use `uule` with a pre-encoded Google UULE string. The `location` and `uule` parameters are mutually exclusive: provide one or the other, not both.
 
 ### Multiple page scraping
 
@@ -209,7 +300,7 @@ Scrape multiple pages of search results in a single request using the `pages` pa
 
 ### Raw HTML access
 
-For advanced use cases, get the complete HTML by setting `include.html` to `true`. Returns an array of HTML file URLs.
+To get the full HTML, set `include.html` to `true`. Returns an array of HTML file URLs.
 
 ## Practical Google Search scraper use cases
 
@@ -222,7 +313,7 @@ For advanced use cases, get the complete HTML by setting `include.html` to `true
 
 ## Why choose cloro?
 
-- **Simple integration:** Clean API design with comprehensive documentation and examples.
+- **Simple integration:** Clean API design with documentation and examples.
 - **Reliable performance:** >99% uptime and low latencies.
 - **No infrastructure hassle:** We handle rate limiting, proxies, and browser management.
 - **Flexible pricing:** Low-cost subscription model with transparent pricing.
@@ -236,11 +327,11 @@ Any website is legal to be scraped as long as the information is publicly access
 
 ### What makes cloro's Google Search scraper unique?
 
-cloro's Google endpoint provides reliable access to Google Search with:
+cloro's Google endpoint provides access to Google Search with:
 
 - **AI Overview extraction** with source attribution
-- **Sponsored ad extraction** with full ad details, sitelinks, and placement information
-- **Built-in anti-detection** to ensure consistent results
+- **Sponsored ad extraction** with ad details, sitelinks, and placement information
+- **Built-in anti-detection** for consistent results
 
 ### What's the recommended timeout for requests?
 
@@ -254,7 +345,7 @@ Yes, you can specify country codes like `US`, `GB`, `DE`, `JP` and more to get l
 
 For detailed documentation, advanced features, and integration guides, visit:
 
-- **API documentation:** [docs.cloro.dev](https://docs.cloro.dev/)
+- **API documentation:** [cloro.dev/docs](https://cloro.dev/docs/)
 - **Google Search scraper page:** [cloro.dev/google-search](https://cloro.dev/google-search/)
 
 ## Other available scrapers
