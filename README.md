@@ -1,12 +1,28 @@
-# Google Search scraper
+# Google Search Scraper API — Organic Results, PAA, Related Searches & AI Overview
 
 [![Google Search scraper by cloro](https://github.com/cloro-dev/google-search-scraper/blob/main/google-scraper-hero-image.png)](https://cloro.dev/google-search/?utm_source=github)
 
 [![cloro](https://img.shields.io/badge/Powered%20by-cloro-blue?style=for-the-badge)](https://cloro.dev/)
 
-The [Google Search scraper](https://cloro.dev/google-search/) by cloro lets developers programmatically interact with Google Search and collect search results with structured metadata. You can retrieve results as parsed JSON, raw HTML, or other formats for integration into your workflows.
+Scrape Google Search results via API. Returns parsed JSON with **organic results**, **People Also Ask** questions, **related searches**, featured snippets, knowledge panels, and optional **AI Overview** data. Python, cURL, and Node.js examples below.
 
-You can use cloro's Google Search scraper for SEO monitoring, rank tracking, market research, and content idea generation. It handles dynamic content, supports real-time extraction, and removes the need to manage authentication, sessions, or anti-bot systems.
+Built for developers doing SEO rank tracking, SERP monitoring across countries and states, PAA/related-query research for content strategy, and market intelligence — without managing CAPTCHAs, rotating proxies, session state, or Google's anti-bot defenses.
+
+## Quick start
+
+1. Get an API key at [cloro.dev](https://cloro.dev/?utm_source=github&utm_medium=readme).
+2. Send a request:
+
+   ```bash
+   curl -X POST https://api.cloro.dev/v1/monitor/google \
+     -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"query": "best crm for small business", "country": "US"}'
+   ```
+
+3. Parse the returned JSON — `result.organic[]`, `result.paa[]`, `result.relatedSearches[]`, `result.aiOverview`.
+
+Full examples in Python, cURL, and Node.js below.
 
 ## How it works
 
@@ -198,6 +214,19 @@ The Google Search scraper API returns a structured JSON object containing Google
         "date": "5 days ago"
       }
     ],
+    "localResults": [
+      {
+        "position": 1,
+        "title": "Joe's Pizza Broadway",
+        "placeId": "/g/11bw4ws2mt",
+        "rating": 4.4,
+        "reviews": "26K",
+        "price": "$10–20",
+        "type": "Pizza",
+        "address": "1435 Broadway",
+        "description": "\"Fast service, great atmosphere, and truly scrumptious pizza.\""
+      }
+    ],
     "relatedSearches": [
       {
         "query": "best budget laptop for coding",
@@ -238,8 +267,16 @@ The Google Search scraper API returns a structured JSON object containing Google
           "position": 1
         }
       ],
+      "relatedLinks": [
+        {
+          "label": "Compare developer laptops",
+          "citationPillId": 1,
+          "url": "https://www.google.com/search?q=developer+laptops&ibp=oshop",
+          "domain": "google.com"
+        }
+      ],
       "text": "Top laptops for programming include...",
-      "markdown": "**Top laptops** for programming include...[Programming Laptop Guide](https://example.com/guide)"
+      "markdown": "**Top laptops** for programming include...[Programming Laptop Guide](https://example.com/guide)[Compare developer laptops](https://www.google.com/search?q=developer+laptops&ibp=oshop)"
     },
     "html": [
       "https://storage.cloro.dev/results/b83e8dfd-c3a1-4b98-83b9-af91adc21e26/page-1.html"
@@ -265,6 +302,10 @@ Ads are extracted automatically whenever they appear on the search results page.
 
 When Google renders the "What people are saying" / "Trending posts and discussions" module on the SERP, the scraper extracts each card into the `peopleAreSaying` array. Each card carries `position`, `title`, `link`, and `date` (Google's raw relative-time text, not normalized). The field is omitted from `result` when no module is present.
 
+### Local pack extraction
+
+When Google renders the local pack (the map-backed "3-pack" of local businesses) on a local-intent query, the scraper extracts each place into the `localResults` array. Every place carries `position` and `title`; the remaining fields — `placeId`, `rating`, `reviews`, `price`, `type`, `yearsInBusiness`, `address`, `phone`, `hours`, `description`, and a `links` object (`website`, `directions`) — are included only when Google renders them, so restaurant packs tend to carry `price` while service packs (plumbers, dentists) tend to carry `yearsInBusiness`, `phone`, `hours`, and action `links`. Extraction is desktop only; the field is omitted from `result` when no local pack is present. The pack only exposes its visible places (typically 3); when Google renders a "More places" / "More businesses" control, the response also includes `localResultsMoreLink`, the URL of Google's expanded Local Finder for the query (the full list is not embedded — follow the link to retrieve it).
+
 ### Shopping card extraction
 
 When Google renders organic shopping grids ("Popular products" or "More products") on the SERP, the scraper extracts each card into the `shoppingCards` array. When a section header can be parsed, each card includes a `category` field naming its parent section so callers can distinguish cards from coexisting shopping panels. The `shoppingCards` field is omitted from `result` when no shopping section is present.
@@ -285,6 +326,18 @@ When the AI Overview answer carries pill chips (e.g. a `[Chase Bank +3]` chip gr
 | `domain`         | string  | Host extracted from `url`, for grouping and display.                                                                                                        |
 | `description`    | string  | Source snippet from the sources rail when Google ships one. Omitted when absent.                                                                            |
 | `position`       | integer | 1-based position of this source in the sibling `aioverview.sources` array.                                                                                  |
+
+#### Related links array structure
+
+A citation chip can also expose a "View related links" flyout: URLs Google groups under the chip that are **not** in the `sources` rail (e.g. a Google Shopping comparison link). These surface in `aioverview.relatedLinks` so they never inflate `sources` or `citationPills`. Each entry shares the `citationPillId` of its chip but has no `position` — a related link is absent from `sources`. They also render inline in `markdown`, so `markdown` can carry more URLs than `sources` / `citationPills`; the extras are the related links listed here. The field is omitted when no chip carries related links.
+
+| Field            | Type    | Description                                                                                                                          |
+| ---------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `label`          | string  | The related page's own title (e.g. `"Compare developer laptops"`). May be an empty string when Google ships none — read `domain` / `url` for identity. |
+| `citationPillId` | integer | Matches the `citationPillId` of the chip's citation-pill entries, so related links can be grouped with their pill.                  |
+| `url`            | string  | Direct URL of the related link.                                                                                                     |
+| `domain`         | string  | Host extracted from `url`, for grouping and display.                                                                                |
+| `description`    | string  | Snippet Google ships for the related link. Omitted when absent.                                                                     |
 
 ### People Also Ask AI Overview hydration
 
@@ -362,7 +415,7 @@ For detailed documentation, advanced features, and integration guides, visit:
 
 ## Contact us
 
-If you have questions or need support, reach out to us at [support@cloro.dev](mailto:support@cloro.dev).
+If you have questions or need support, join our community at [r/cloroapi](https://www.reddit.com/r/cloroapi/).
 
 ---
 
