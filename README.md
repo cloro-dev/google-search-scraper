@@ -23,7 +23,7 @@ payload = {
     'query': 'best serp api',
     'country': 'US',
     'pages': 1,
-    'include': {'aioverview': True},
+    'include': {'aioverview': {'markdown': True}},
 }
 
 response = requests.post(
@@ -41,7 +41,7 @@ print(response.json())
 curl -X POST https://api.cloro.dev/v1/monitor/google \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"query": "best serp api", "country": "US", "include": {"aioverview": true}}'
+  -d '{"query": "best serp api", "country": "US", "include": {"aioverview": {"markdown": true}}}'
 ```
 
 Node.js and async/webhook examples are in the [endpoint documentation](https://cloro.dev/docs/api-reference/endpoint/monitor-google).
@@ -51,13 +51,13 @@ Node.js and async/webhook examples are in the [endpoint documentation](https://c
 | Parameter | Description | Default |
 | --- | --- | --- |
 | `query`\* | The search query | – |
-| `country` | Country code for localized results (`US`, `GB`, `DE`) | `US` |
+| `country`\* | Country code for localized results (`US`, `GB`, `DE`). Required unless you send `gl` | – |
 | `location` | [Google canonical location name](https://developers.google.com/google-ads/api/reference/data/geotargets) for geo-targeting. Mutually exclusive with `uule` | – |
 | `uule` | Pre-encoded Google UULE string. Mutually exclusive with `location` | – |
-| `device` | `desktop` or `mobile` | `desktop` |
+| `device` | `desktop`, `mobile`, `ios` or `android` | `desktop` |
 | `pages` | Number of result pages to return | `1` |
-| `include.aioverview` | Include the AI Overview block | `false` |
-| `include.html` | Return a URL to the full HTML (expires after 24h) | `false` |
+| `include.aioverview` | Send `{"markdown": true}` to get the AI Overview block, with Markdown | – |
+| `include.html` | Return URLs to the full HTML, one per page (expire after 24h) | `false` |
 
 \* Required
 
@@ -68,25 +68,26 @@ Node.js and async/webhook examples are in the [endpoint documentation](https://c
   "success": true,
   "result": {
     "organicResults": [
-      { "position": 1, "title": "Best SERP APIs", "url": "https://example.com/serp-apis", "domain": "example.com", "description": "Comparison of providers..." }
+      { "position": 1, "title": "Best SERP APIs", "link": "https://example.com/serp-apis", "displayedLink": "https://example.com", "snippet": "Comparison of providers..." }
     ],
-    "peopleAlsoAsk": [{ "question": "What is a SERP API?", "answer": "A SERP API returns search results as structured data..." }],
-    "peopleAreSaying": [{ "source": "reddit.com", "snippet": "We switched after the num=100 change..." }],
-    "localResults": [{ "title": "Example Agency", "rating": 4.6, "reviews": 128, "address": "123 Example St" }],
-    "aioverview": { "text": "SERP APIs return search results as structured JSON...", "sources": [{ "position": 1, "url": "https://example.com" }] },
-    "relatedSearches": ["serp api pricing", "google search api alternatives"]
+    "peopleAlsoAsk": [{ "question": "What is a SERP API?", "type": "LINK", "snippet": "A SERP API returns search results as structured data...", "link": "https://example.com/what-is-a-serp-api" }],
+    "peopleAreSaying": [{ "position": 1, "title": "We switched after the num=100 change", "link": "https://www.reddit.com/r/SEO/comments/example/", "date": "3 days ago" }],
+    "localResults": [{ "position": 1, "title": "Example Agency", "rating": 4.6, "reviews": "128", "address": "123 Example St" }],
+    "aioverview": { "text": "SERP APIs return search results as structured JSON...", "sources": [{ "position": 1, "url": "https://example.com", "label": "Example" }] },
+    "relatedSearches": [{ "query": "serp api pricing", "link": "https://www.google.com/search?q=serp+api+pricing" }]
   }
 }
 ```
 
-1. **`organicResults`** — position, title, URL, domain and description per result.
+1. **`organicResults`** — position, title, link, displayed link and snippet per result.
 2. **`aioverview`** — the AI Overview block with its own cited sources, returned inline rather than behind a second request.
-3. **`peopleAlsoAsk`** — PAA questions with their answers.
+3. **`peopleAlsoAsk`** — PAA questions, with the answer snippet and source link where Google shows one.
 4. **`peopleAreSaying`** — the forum and social block Google now surfaces on many commercial queries.
 5. **`localResults`** — the local pack with rating, reviews and address.
 6. **`shoppingCards`** — product carousels with price and store.
 7. **`ads`** — paid results, parsed and positioned.
-8. **`relatedSearches`** — the related-query block.
+8. **`relatedSearches`** — the related-query block, each with its query and search link.
+9. **`knowledgeGraph`** — the entity panel for a person, place, organization or product, when Google shows one.
 
 Full field-level schemas are in the [endpoint reference](https://cloro.dev/docs/api-reference/endpoint/monitor-google).
 
@@ -105,7 +106,7 @@ Google removed it on September 11, 2025. Every provider now paginates at 10 resu
 
 ### Does the AI Overview cost extra?
 
-It is returned in the same response when you set `include.aioverview`, rather than requiring a second request. See the [pricing page](https://cloro.dev/pricing/) for how credits are counted at depth.
+Yes. It is a paid add-on, charged whether or not Google shows an Overview for the query, and it comes back in the same response rather than a second request. See [Google Search pricing](https://cloro.dev/docs/guides/providers#google-search-multi-page-pricing) for how credits add up with pages.
 
 ### Can I get city-level results?
 
@@ -126,4 +127,4 @@ cloro returns publicly visible results pages. No court has ruled that scraping p
 
 ## Contact us
 
-Questions or support: [r/cloroapi](https://www.reddit.com/r/cloroapi/).
+Questions or support: [ask the docs AI assistant](https://cloro.dev/docs/?assistant).
