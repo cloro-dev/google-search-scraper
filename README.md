@@ -79,7 +79,7 @@ Node.js and async/webhook examples are in the [endpoint documentation](https://c
 }
 ```
 
-1. **`organicResults`** — position, title, link, displayed link and snippet per result.
+1. **`organicResults`** — position, title, link, displayed link and snippet per result, and `absolutePosition`, the rank among all the elements of the SERP.
 2. **`aioverview`** — the AI Overview block with its own cited sources, returned inline rather than behind a second request.
 3. **`peopleAlsoAsk`** — PAA questions, with the answer snippet and source link where Google shows one.
 4. **`peopleAreSaying`** — the forum and social block Google now surfaces on many commercial queries.
@@ -88,6 +88,7 @@ Node.js and async/webhook examples are in the [endpoint documentation](https://c
 7. **`ads`** — paid results, parsed and positioned.
 8. **`relatedSearches`** — the related-query block, each with its query and search link.
 9. **`knowledgeGraph`** — the entity panel for a person, place, organization or product, when Google shows one.
+10. **Other SERP blocks** — `videos`, `shortVideos`, `inlineImages`, `topSights`, `hotelResults`, `flights`, `transitResults`, `events`, `weather`, `sportsResults`, `financeQuote`, `stores`, `comparisonShoppingSites`, `discussionsAndForums`, `latestPosts`, `thingsToKnow` and `relatedWebsites`, when Google shows them.
 
 Full field-level schemas are in the [endpoint reference](https://cloro.dev/docs/api-reference/endpoint/monitor-google).
 
