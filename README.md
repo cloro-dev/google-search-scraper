@@ -4,7 +4,7 @@
 
 [![cloro](https://img.shields.io/badge/Powered%20by-cloro-blue?style=for-the-badge)](https://cloro.dev/)
 
-The [Google Search scraper](https://cloro.dev/google-search/?utm_source=github) by cloro returns the live results page as structured JSON: organic results, ads, People Also Ask, People Are Saying, local pack, related searches, shopping cards and the AI Overview.
+The [Google Search scraper](https://cloro.dev/google-search/?utm_source=github) by cloro is a SERP API that returns the live Google results page as parsed JSON. The JSON holds what Google shows: organic results, ads, People Also Ask, People Are Saying, local pack, related searches, shopping cards and the AI Overview.
 
 ## How do you scrape Google Search?
 
@@ -79,26 +79,30 @@ Node.js and async/webhook examples are in the [endpoint documentation](https://c
 }
 ```
 
-1. **`organicResults`** — position, title, link, displayed link and snippet per result.
-2. **`aioverview`** — the AI Overview block with its own cited sources, returned inline rather than behind a second request.
-3. **`peopleAlsoAsk`** — PAA questions, with the answer snippet and source link where Google shows one.
-4. **`peopleAreSaying`** — the forum and social block Google now surfaces on many commercial queries.
-5. **`localResults`** — the local pack with rating, reviews and address.
-6. **`shoppingCards`** — product carousels with price and store.
-7. **`ads`** — paid results, parsed and positioned.
-8. **`relatedSearches`** — the related-query block, each with its query and search link.
-9. **`knowledgeGraph`** — the entity panel for a person, place, organization or product, when Google shows one.
+1. **`organicResults`**: position, title, link, displayed link and snippet per result.
+2. **`aioverview`**: the AI Overview block with its own cited sources, returned inline rather than behind a second request.
+3. **`peopleAlsoAsk`**: PAA questions, with the answer snippet and source link where Google shows one.
+4. **`peopleAreSaying`**: the forum and social block Google now surfaces on many commercial queries.
+5. **`localResults`**: the local pack with rating, reviews and address.
+6. **`shoppingCards`**: product carousels with price and store.
+7. **`ads`**: paid results, parsed and positioned.
+8. **`relatedSearches`**: the related-query block, each with its query and search link.
+9. **`knowledgeGraph`**: the entity panel for a person, place, organization or product, when Google shows one.
 
 Full field-level schemas are in the [endpoint reference](https://cloro.dev/docs/api-reference/endpoint/monitor-google).
 
 ## Use cases
 
 - **Rank tracking** at city level using `location` or `uule`, where a national average and a metro result diverge.
-- **AI Overview monitoring** — presence, text and cited sources, in the same response as the organic results.
-- **SERP feature research** — how often PAA, local pack or People Are Saying fire on a query class.
-- **Competitive analysis** — who holds the page for the queries your buyers run.
+- **AI Overview monitoring**: presence, text and cited sources, in the same response as the organic results.
+- **SERP feature research**: how often PAA, local pack or People Are Saying fire on a query class.
+- **Competitive analysis**: who holds the page for the queries your buyers run.
 
 ## FAQ
+
+### What success rate should you expect from a Google scraping API?
+
+cloro documents an average success rate above 99% ([error handling](https://cloro.dev/docs/guides/error-handling)). Google keeps changing its pages and blocking, so the rate moves; the [status page](https://status.cloro.dev) shows live numbers. You run no proxies: cloro makes up to 5 attempts per request. Background: [Google's verification page](https://cloro.dev/blog/google-verifying-your-request/) and [SERP API reliability at scale](https://cloro.dev/blog/serp-api-reliability-at-scale/).
 
 ### What happened to `&num=100`?
 
@@ -108,9 +112,17 @@ Google removed it on September 11, 2025. Every provider now paginates at 10 resu
 
 Yes. It is a paid add-on, charged whether or not Google shows an Overview for the query, and it comes back in the same response rather than a second request. See [Google Search pricing](https://cloro.dev/docs/guides/providers#google-search-multi-page-pricing) for how credits add up with pages.
 
-### Can I get city-level results?
+### Can I get city-level and device-level Google results?
 
-Yes. `location` takes a Google canonical location name and `uule` takes a pre-encoded string. They are mutually exclusive.
+Yes. For a city, `location` takes a Google canonical location name and `uule` takes a pre-encoded string. They are mutually exclusive. For a device, set `device` to `desktop`, `mobile`, `ios` or `android`.
+
+### Does the SERP API bill only for successful requests?
+
+Yes. cloro charges a sync request when it returns `200` and an async task when it reaches `COMPLETED`. Errors, failed tasks and the retries cloro runs inside a request cost nothing ([billing](https://cloro.dev/docs/guides/billing)).
+
+### Is there an n8n or Zapier integration?
+
+Yes. The [`n8n-nodes-cloro`](https://cloro.dev/docs/integrations/n8n) community node is listed in the n8n integrations directory, and the [cloro app for Zapier](https://cloro.dev/docs/integrations/zapier) sends a query from any Zap. Both return the parsed JSON.
 
 ### Is scraping Google results legal?
 
