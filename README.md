@@ -135,7 +135,7 @@ cloro returns publicly visible results pages. No court has ruled that scraping p
 
 ## Other cloro scrapers
 
-[AI Mode](https://cloro.dev/ai-mode/) · [AI Overview](https://cloro.dev/ai-overview/) · [ChatGPT](https://cloro.dev/chatgpt/) · [Gemini](https://cloro.dev/gemini/) · [Google News](https://cloro.dev/google-news/)
+[AI Mode](https://cloro.dev/ai-mode/) · [AI Overview](https://cloro.dev/ai-overview/) · [Bing AI Mode](https://cloro.dev/bing-ai-mode/) · [ChatGPT](https://cloro.dev/chatgpt/) · [Gemini](https://cloro.dev/gemini/) · [Google News](https://cloro.dev/google-news/)
 
 ## Contact us
 
