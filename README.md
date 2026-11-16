@@ -88,6 +88,14 @@ Node.js and async/webhook examples are in the [endpoint documentation](https://c
 7. **`ads`**: paid results, parsed and positioned.
 8. **`relatedSearches`**: the related-query block, each with its query and search link.
 9. **`knowledgeGraph`**: the entity panel for a person, place, organization or product, when Google shows one.
+10. **`videos`**, **`shortVideos`** and **`inlineImages`**: the Videos and Short videos carousels and the Images block, each card with its title, link, source and thumbnail.
+11. **`hotelResults`**, **`flights`** and **`transitResults`**: the hotel pack, the flights blocks and the train and bus block, with prices, times and booking sites.
+12. **`topSights`** and **`events`**: the top sights of a city or place, and the events block with dates, venues and ticket sellers.
+13. **`stores`** and **`comparisonShoppingSites`**: the merchants of the Stores block and, in the EEA, the products of each comparison shopping site.
+14. **`weather`**, **`sportsResults`** and **`financeQuote`**: the weather card, the sports block (games, standings, squads) and the market summary of a stock, index or crypto currency.
+15. **`discussionsAndForums`**, **`latestPosts`**, **`thingsToKnow`** and **`relatedWebsites`**: forum threads with their answers, an entity's own social posts, the "Things to know" facets and the carousels of site cards.
+
+Google shows these blocks only on some queries, and a key is absent when its block is not on the page.
 
 Full field-level schemas are in the [endpoint reference](https://cloro.dev/docs/api-reference/endpoint/monitor-google).
 
