@@ -79,7 +79,7 @@ Node.js and async/webhook examples are in the [endpoint documentation](https://c
 }
 ```
 
-1. **`organicResults`**: position, title, link, displayed link and snippet per result.
+1. **`organicResults`**: position, title, link, displayed link, snippet and "Read more" link per result.
 2. **`aioverview`**: the AI Overview block with its own cited sources, returned inline rather than behind a second request.
 3. **`peopleAlsoAsk`**: PAA questions, with the answer snippet and source link where Google shows one.
 4. **`peopleAreSaying`**: the forum and social block Google now surfaces on many commercial queries.
