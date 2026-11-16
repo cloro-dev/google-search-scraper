@@ -55,6 +55,7 @@ Node.js and async/webhook examples are in the [endpoint documentation](https://c
 | `location` | [Google canonical location name](https://developers.google.com/google-ads/api/reference/data/geotargets) for geo-targeting. Mutually exclusive with `uule` | – |
 | `uule` | Pre-encoded Google UULE string. Mutually exclusive with `location` | – |
 | `device` | `desktop`, `mobile`, `ios` or `android` | `desktop` |
+| `hl` | Interface language, as Google's own `hl` (`en`, `de`, `pt-BR`). Overrides the language cloro derives from the country | Derived from `country` |
 | `pages` | Number of result pages to return | `1` |
 | `include.aioverview` | Send `{"markdown": true}` to get the AI Overview block, with Markdown | – |
 | `include.html` | Return URLs to the full HTML, one per page (expire after 24h) | `false` |
@@ -111,6 +112,14 @@ Full field-level schemas are in the [endpoint reference](https://cloro.dev/docs/
 ### What success rate should you expect from a Google scraping API?
 
 cloro documents an average success rate above 99% ([error handling](https://cloro.dev/docs/guides/error-handling)). Google keeps changing its pages and blocking, so the rate moves; the [status page](https://status.cloro.dev) shows live numbers. You run no proxies: cloro makes up to 5 attempts per request. Background: [Google's verification page](https://cloro.dev/blog/google-verifying-your-request/) and [SERP API reliability at scale](https://cloro.dev/blog/serp-api-reliability-at-scale/).
+
+### Does any SERP API return the raw HTML alongside the parsed results?
+
+Yes: cloro's Google Search API returns it when you set `include.html: true`. `result.html` then comes back in the same response as the parsed fields, as an array of CDN URLs, one per results page, at no extra credit cost. Each URL expires after 24 hours, so download the HTML if you need it longer ([output formats](https://cloro.dev/docs/guides/output-formats)). Use it as proof of the page Google served, or to parse a block that cloro does not parse.
+
+### Do SERP APIs return personalized results or a neutral SERP?
+
+cloro returns a SERP with no personalization from a user account: each request runs in a logged-out session, with no account of any kind, through a proxy in the `country` you set ([how cloro retrieves data](https://cloro.dev/docs/guides/providers#how-does-cloro-retrieve-data-from-ai-providers)). The page still changes with the inputs you send, by design. `location` or `uule` sets the place (without either, cloro uses the country's canonical location where it has one), `device` selects the desktop or mobile SERP, and `hl` sets the interface language. Send the same inputs on every run when you compare results over time.
 
 ### What happened to `&num=100`?
 
