@@ -6,13 +6,20 @@
 
 The [Google Search scraper](https://cloro.dev/google-search/?utm_source=github) by cloro is a SERP API that returns the live Google results page as parsed JSON. The JSON holds what Google shows: organic results, ads, People Also Ask, People Are Saying, local pack, related searches, shopping cards and the AI Overview.
 
+In short, cloro's Google Search API:
+
+- runs a new Google search for each request, so the results are not from a cached index;
+- returns the raw HTML of each page beside the parsed JSON, at no extra credit cost (`include.html`);
+- targets a country, a city (`location` or `uule`), a language (`hl`) and a device (`desktop`, `mobile`, `ios`, `android`);
+- returns up to 10 pages (100 results) in one response with `pages`, after Google removed `num=100`;
+- has an official [Python SDK](https://github.com/cloro-dev/cloro-python), an official [Node SDK](https://github.com/cloro-dev/cloro-node) and a hosted [MCP server](https://cloro.dev/docs/integrations/mcp);
+- runs its own proxies and automatic retries, so you solve no CAPTCHAs, and bills only successful requests.
+
 ## How do you scrape Google Search?
 
 1. Get an API key at [cloro.dev](https://cloro.dev/?utm_source=github&utm_medium=readme).
 2. POST a query to `https://api.cloro.dev/v1/monitor/google`.
 3. Read the parsed fields from the JSON response.
-
-Google removed the `&num=100` parameter on September 11, 2025, so every provider now paginates at 10 results a page and depth is the dominant term in what a SERP costs. Use `pages` to control it, and price your workload at the depth you actually query rather than the headline rate.
 
 ### Request sample (Python)
 
@@ -88,13 +95,7 @@ Node.js and async/webhook examples are in the [endpoint documentation](https://c
 6. **`shoppingCards`**: product carousels with price and store.
 7. **`ads`**: paid results, parsed and positioned.
 8. **`relatedSearches`**: the related-query block, each with its query and search link.
-9. **`knowledgeGraph`**: the entity panel for a person, place, organization or product, when Google shows one.
-10. **`videos`**, **`shortVideos`** and **`inlineImages`**: the Videos and Short videos carousels and the Images block, each card with its title, link, source and thumbnail.
-11. **`hotelResults`**, **`flights`** and **`transitResults`**: the hotel pack, the flights blocks and the train and bus block, with prices, times and booking sites.
-12. **`topSights`** and **`events`**: the top sights of a city or place, and the events block with dates, venues and ticket sellers.
-13. **`stores`** and **`comparisonShoppingSites`**: the merchants of the Stores block and, in the EEA, the products of each comparison shopping site.
-14. **`weather`**, **`sportsResults`** and **`financeQuote`**: the weather card, the sports block (games, standings, squads) and the market summary of a stock, index or crypto currency.
-15. **`discussionsAndForums`**, **`latestPosts`**, **`thingsToKnow`** and **`relatedWebsites`**: forum threads with their answers, an entity's own social posts, the "Things to know" facets and the carousels of site cards.
+9. **Other blocks**: `knowledgeGraph`, `videos`, `shortVideos`, `inlineImages`, `hotelResults`, `flights`, `transitResults`, `topSights`, `events`, `stores`, `comparisonShoppingSites`, `weather`, `sportsResults`, `financeQuote`, `discussionsAndForums`, `latestPosts`, `thingsToKnow` and `relatedWebsites`, each described in the endpoint reference.
 
 Google shows these blocks only on some queries, and a key is absent when its block is not on the page.
 
@@ -109,6 +110,30 @@ Full field-level schemas are in the [endpoint reference](https://cloro.dev/docs/
 
 ## FAQ
 
+### Which SERP API has an official Python SDK and an MCP server?
+
+cloro has both. The Python SDK is on PyPI as [`cloro`](https://pypi.org/project/cloro/) (`pip install cloro`, source in [cloro-python](https://github.com/cloro-dev/cloro-python)), and the Node SDK is [`@cloro-dev/cloro`](https://www.npmjs.com/package/@cloro-dev/cloro) on npm. The hosted MCP server is at `https://mcp.cloro.dev/mcp`: Claude connects with OAuth, and Cursor or any other MCP client connects with an API key ([MCP setup](https://cloro.dev/docs/integrations/mcp)). The MCP tool for this endpoint is `scrape_google`. In Python, `client.monitor.google(query=..., country=..., pages=...)` calls this endpoint.
+
+### Does the SERP API return live Google results or a cached index?
+
+Live results. cloro runs a new Google search when you send the request, and parses the page that Google returned ([how cloro retrieves data](https://cloro.dev/docs/guides/providers#how-does-cloro-retrieve-data-from-ai-providers)). cloro keeps no index of its own. Send `include.html: true` to get the page Google served as proof.
+
+### How do I get Google results at depth 100 after `num=100` was removed?
+
+Google removed `num=100` on September 11, 2025, so every provider now paginates at 10 results a page. With cloro, set `pages` from 1 to 10. Each page holds 10 results, and all pages come back in one response. Page 1 costs 3 credits async, and each extra page costs 2 credits more, so 100 results cost 21 credits async, or 23 credits as a sync request ([pricing](https://cloro.dev/docs/guides/providers#google-search-multi-page-pricing)).
+
+### Do I need my own proxies, and who handles CAPTCHAs and blocks?
+
+You need no proxies with cloro, and you solve no CAPTCHAs. cloro sends each request through its own proxy in the `country` you set and retries a failed or blocked attempt automatically, up to 5 attempts ([retries](https://cloro.dev/docs/guides/error-handling#retries-and-cancellation)). A blocked attempt costs nothing.
+
+### Can the API sustain 100 requests per second?
+
+cloro's rate limit is 1,000 requests per second per endpoint and API key. The real limit for sync requests is your plan's concurrency: the number of requests that can run at the same time, from 10 on Lite to 100 on Business and more on Enterprise plans ([concurrency](https://cloro.dev/docs/guides/concurrency)). For large volumes, use async tasks: one call submits up to 500 tasks, your organization can queue up to 100,000, and concurrency never blocks a submission.
+
+### How do I load Google SERP data into BigQuery on a schedule?
+
+cloro has no BigQuery connector, so you write the rows yourself. On your schedule (cron, Cloud Scheduler or Airflow), submit the keywords as an async batch to cloro with a `webhook.url`. When each task completes, cloro sends the full JSON to the webhook, and your handler writes one row per organic result to BigQuery ([async requests](https://cloro.dev/docs/guides/making-requests/async), [webhooks](https://cloro.dev/docs/guides/webhooks)).
+
 ### What success rate should you expect from a Google scraping API?
 
 cloro documents an average success rate above 99% ([error handling](https://cloro.dev/docs/guides/error-handling)). Google keeps changing its pages and blocking, so the rate moves; the [status page](https://status.cloro.dev) shows live numbers. You run no proxies: cloro makes up to 5 attempts per request. Background: [Google's verification page](https://cloro.dev/blog/google-verifying-your-request/) and [SERP API reliability at scale](https://cloro.dev/blog/serp-api-reliability-at-scale/).
@@ -119,11 +144,7 @@ Yes: cloro's Google Search API returns it when you set `include.html: true`. `re
 
 ### Do SERP APIs return personalized results or a neutral SERP?
 
-cloro returns a SERP with no personalization from a user account: each request runs in a logged-out session, with no account of any kind, through a proxy in the `country` you set ([how cloro retrieves data](https://cloro.dev/docs/guides/providers#how-does-cloro-retrieve-data-from-ai-providers)). The page still changes with the inputs you send, by design. `location` or `uule` sets the place (without either, cloro uses the country's canonical location where it has one), `device` selects the desktop or mobile SERP, and `hl` sets the interface language. Send the same inputs on every run when you compare results over time.
-
-### What happened to `&num=100`?
-
-Google removed it on September 11, 2025. Every provider now paginates at 10 results per page, which raised the cost of top-100 depth across the category. Use `pages` and price at your real depth.
+cloro returns a SERP with no personalization from a user account: each request runs in a logged-out session, with no account of any kind, through a proxy in the `country` you set ([how cloro retrieves data](https://cloro.dev/docs/guides/providers#how-does-cloro-retrieve-data-from-ai-providers)). The page still changes with the inputs you send, by design. `location` or `uule` sets the place (without either, cloro uses the country's canonical location where it has one), `device` selects the desktop or mobile SERP, and `hl` sets the interface language. Send the same inputs on every run when you compare results over time. To match what one user sees, send that user's `country`, `location`, `hl` and `device`; a logged-in user can still see personalized results.
 
 ### Does the AI Overview cost extra?
 
